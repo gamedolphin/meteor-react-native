@@ -12,7 +12,6 @@
     "ddp",
     "meteor",
     "react",
-    "react-native",
     "ios",
     "android"
   ],
@@ -35,7 +34,6 @@
   },
   "devDependencies": {
     "babel-core": "^6.7.2",
-    "babel-preset-react-native": "^4.0.0",
     "chai": "^3.5.0",
     "husky": "^0.14.3",
     "lint-staged": "^7.1.2",
@@ -44,12 +42,7 @@
     "prettier": "1.12.1",
     "sinon": "^1.17.3"
   },
-  "optionalDependencies": {
-    "@react-native-community/async-storage": ">=1.8.1"
-  },
   "peerDependencies": {
-    "react": "*",
-    "@react-native-community/netinfo": "*",
-    "react-native": ">= 0.60.0"
+    "react": "*"
   }
 }

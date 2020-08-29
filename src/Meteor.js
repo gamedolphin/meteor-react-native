@@ -1,10 +1,4 @@
-import NetInfo from "@react-native-community/netinfo";
-
 import { name as packageName } from '../package.json';
-
-if(packageName !== "@meteorrn/core") {
-  console.error(`DEPRECATED: Please change "meteor-react-native" in your package.json to "@meteorrn/core" and run npm install`);
-}
 
 import Trackr from 'trackr';
 import EJSON from 'ejson';
@@ -16,7 +10,8 @@ import Mongo from './Mongo';
 import { Collection, runObservers, localCollections } from './Collection';
 import call from './Call';
 
-import withTracker from './components/ReactMeteorData';
+import withTracker from './components/withTracker';
+import useTracker from './components/useTracker';
 
 import ReactiveDict from './ReactiveDict';
 
@@ -72,27 +67,12 @@ module.exports = {
   reconnect() {
     Data.ddp && Data.ddp.connect();
   },
-  packageInterface:() => {
-    return {
-      AsyncStorage:Data._options.AsyncStorage || require('@react-native-community/async-storage').default
-    };
-  },
   connect(endpoint, options) {
     if (!endpoint) endpoint = Data._endpoint;
     if (!options) options = Data._options;
 
-    if((!endpoint.startsWith("ws") || !endpoint.endsWith("/websocket")) && !options.suppressUrlErrors) {
+    if ((!endpoint.startsWith("ws") || !endpoint.endsWith("/websocket")) && !options.suppressUrlErrors) {
       throw new Error(`Your url "${endpoint}" may be in the wrong format. It should start with "ws://" or "wss://" and end with "/websocket", e.g. "wss://myapp.meteor.com/websocket". To disable this warning, connect with option "suppressUrlErrors" as true, e.g. Meteor.connect("${endpoint}", {suppressUrlErrors:true});`);
-    }
-    
-    if (!options.AsyncStorage) {
-      const AsyncStorage = require('@react-native-community/async-storage').default;
-
-      if (AsyncStorage) {
-        options.AsyncStorage = AsyncStorage;
-      } else {
-        throw new Error('No AsyncStorage detected. Import an AsyncStorage package and add to `options` in the Meteor.connect() method');
-      }
     }
 
     Data._endpoint = endpoint;
@@ -104,17 +84,17 @@ module.exports = {
       ...options,
     });
 
-    NetInfo.addEventListener(({type, isConnected, isInternetReachable, isWifiEnabled}) => {
-      if (isConnected && Data.ddp.autoReconnect) {
-        Data.ddp.connect();
-      }
-    });
+    // NetInfo.addEventListener(({type, isConnected, isInternetReachable, isWifiEnabled}) => {
+    //   if (isConnected && Data.ddp.autoReconnect) {
+    //     Data.ddp.connect();
+    //   }
+    // });
 
     Data.ddp.on('connected', () => {
       // Clear the collections of any stale data in case this is a reconnect
       if (Data.db && Data.db.collections) {
         for (var collection in Data.db.collections) {
-          if(!localCollections.includes(collection)) { // Dont clear data from local collections
+          if (!localCollections.includes(collection)) { // Dont clear data from local collections
             Data.db[collection].remove({});
           }
         }
@@ -122,7 +102,7 @@ module.exports = {
 
       Data.notify('change');
 
-      if(isVerbose) {
+      if (isVerbose) {
         console.info('Connected to DDP server.');
       }
       this._loadInitialUser().then(() => {
@@ -134,7 +114,7 @@ module.exports = {
     Data.ddp.on('disconnected', () => {
       Data.notify('change');
 
-      if(isVerbose) {
+      if (isVerbose) {
         console.info('Disconnected from DDP server.');
       }
 
@@ -155,9 +135,9 @@ module.exports = {
         _id: message.id,
         ...message.fields,
       };
-      
+
       Data.db[message.collection].upsert(document);
-      
+
       runObservers("added", message.collection, document);
     });
 
@@ -186,24 +166,24 @@ module.exports = {
         });
       }
 
-      if(Data.db[message.collection]) {
+      if (Data.db[message.collection]) {
         const document = {
           _id: message.id,
           ...message.fields,
           ...unset,
         };
-        
-        const oldDocument = Data.db[message.collection].findOne({_id:message.id});
-        
+
+        const oldDocument = Data.db[message.collection].findOne({ _id: message.id });
+
         Data.db[message.collection].upsert(document);
-        
-        runObservers("changed", message.collection, document, oldDocument);        
+
+        runObservers("changed", message.collection, document, oldDocument);
       }
     });
 
     Data.ddp.on('removed', message => {
-      if(Data.db[message.collection]) {
-        const oldDocument = Data.db[message.collection].findOne({_id:message.id});        
+      if (Data.db[message.collection]) {
+        const oldDocument = Data.db[message.collection].findOne({ _id: message.id });
         Data.db[message.collection].del(message.id);
         runObservers("removed", message.collection, oldDocument);
       }
@@ -223,6 +203,8 @@ module.exports = {
         }
       }
     });
+
+    Data.ddp.connect();
   },
   subscribe(name) {
     let params = Array.prototype.slice.call(arguments, 1);
