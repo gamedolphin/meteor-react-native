@@ -5,7 +5,8 @@
   "main": "dist/Meteor.js",
   "scripts": {
     "build": "rimraf ./dist && rollup -c",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "install": "npm run build"
   },
   "repository": {
     "type": "git",
