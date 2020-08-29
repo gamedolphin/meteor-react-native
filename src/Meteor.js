@@ -37,6 +37,7 @@ module.exports = {
     return new Collection(name, options);
   },
   withTracker,
+  useTracker,
   getData() {
     return Data;
   },
