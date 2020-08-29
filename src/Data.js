@@ -13,7 +13,9 @@ function runAfterOtherComputations(fn) {
 
 export default {
   _endpoint: null,
-  _options: {},
+  _options: {
+    AsyncStorage: localStorage
+  },
   ddp: null,
   subscriptions: {},
   db: db,

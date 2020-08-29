@@ -1,5 +1,3 @@
-import { name as packageName } from '../package.json';
-
 import Trackr from 'trackr';
 import EJSON from 'ejson';
 import DDP from '../lib/ddp.js';
@@ -66,6 +64,13 @@ module.exports = {
   reconnect() {
     Data.ddp && Data.ddp.connect();
   },
+
+  packageInterface: () => {
+    return {
+      AsyncStorage: Data._options.AsyncStorage
+    };
+  },
+
   connect(endpoint, options) {
     if (!endpoint) endpoint = Data._endpoint;
     if (!options) options = Data._options;
